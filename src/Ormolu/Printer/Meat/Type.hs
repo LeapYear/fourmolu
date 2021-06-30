@@ -204,7 +204,6 @@ p_hsTyVarBndr = \case
     txt "::"
     breakpoint
     inci (located k p_hsType)
-  XTyVarBndr x -> noExtCon x
 
 -- | Render several @forall@-ed variables.
 p_forallBndrs :: Data a => ForallVisFlag -> (a -> R ()) -> [Located a] -> R ()
@@ -236,7 +235,6 @@ p_conDeclField ConDeclField {..} = do
   txt "::"
   breakpoint
   sitcc . inci $ p_hsType (unLoc cd_fld_type)
-p_conDeclField (XConDeclField x) = noExtCon x
 
 tyOpTree :: LHsType GhcPs -> OpTree (LHsType GhcPs) (Located RdrName)
 tyOpTree (L _ (HsOpTy NoExtField l op r)) =
@@ -260,7 +258,6 @@ p_tyOpTree (OpBranch l op r) = do
 tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
 tyVarsToTypes = \case
   HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
-  XLHsQTyVars x -> noExtCon x
 
 tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
 tyVarToType = \case
@@ -273,4 +270,3 @@ tyVarToType = \case
     -- declarations.
     HsParTy NoExtField . noLoc $
       HsKindSig NoExtField (noLoc (HsTyVar NoExtField NotPromoted tvar)) kind
-  XTyVarBndr x -> noExtCon x

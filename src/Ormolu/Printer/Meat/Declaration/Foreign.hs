@@ -24,7 +24,6 @@ p_foreignDecl = \case
   fd@ForeignExport {fd_fe} -> do
     p_foreignExport fd_fe
     p_foreignTypeSig fd
-  XForeignDecl x -> noExtCon x
 
 -- | Printer for the last part of an import\/export, which is function name
 -- and type signature.

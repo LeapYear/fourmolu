@@ -85,7 +85,6 @@ p_dataDecl style name tpats fixity HsDataDefn {..} = do
   unless (null $ unLoc dd_derivs) breakpoint
   inci . located dd_derivs $ \xs ->
     sep newline (located' p_hsDerivingClause) xs
-p_dataDecl _ _ _ _ (XHsDataDefn x) = noExtCon x
 
 p_conDecl ::
   Bool ->
@@ -167,7 +166,6 @@ p_conDecl singleConstRec = \case
             p_rdrName con_name
             space
             located y p_hsType
-  XConDecl x -> noExtCon x
 
 conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
 conArgsSpans = \case
@@ -181,7 +179,6 @@ conArgsSpans = \case
 conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
 conTyVarsSpans = \case
   HsQTvs {..} -> getLoc <$> hsq_explicit
-  XLHsQTyVars x -> noExtCon x
 
 p_lhsContext ::
   LHsContext GhcPs ->
@@ -198,7 +195,6 @@ isGadt :: ConDecl GhcPs -> Bool
 isGadt = \case
   ConDeclGADT {} -> True
   ConDeclH98 {} -> False
-  XConDecl {} -> False
 
 p_hsDerivingClause ::
   HsDerivingClause GhcPs ->
@@ -239,9 +235,6 @@ p_hsDerivingClause HsDerivingClause {..} = do
           txt "via"
           space
           located hsib_body p_hsType
-      ViaStrategy (XHsImplicitBndrs x) ->
-        noExtCon x
-p_hsDerivingClause (XHsDerivingClause x) = noExtCon x
 
 ----------------------------------------------------------------------------
 -- Helpers

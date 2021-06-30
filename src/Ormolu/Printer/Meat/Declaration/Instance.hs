@@ -54,9 +54,6 @@ p_standaloneDerivDecl DerivDecl {..} = do
         inci (located hsib_body p_hsType)
         breakpoint
         instTypes True
-      ViaStrategy (XHsImplicitBndrs x) ->
-        noExtCon x
-p_standaloneDerivDecl (XDerivDecl _) = notImplemented "XDerivDecl"
 
 p_clsInstDecl :: ClsInstDecl GhcPs -> R ()
 p_clsInstDecl = \case
@@ -92,8 +89,6 @@ p_clsInstDecl = \case
           -- Ensure whitespace is added after where clause.
           breakpoint
           dontUseBraces $ p_hsDeclsRespectGrouping Associated allDecls
-      XHsImplicitBndrs x -> noExtCon x
-  XClsInstDecl x -> noExtCon x
 
 p_tyFamInstDecl :: FamilyStyle -> TyFamInstDecl GhcPs -> R ()
 p_tyFamInstDecl style = \case
@@ -108,10 +103,6 @@ p_dataFamInstDecl :: FamilyStyle -> DataFamInstDecl GhcPs -> R ()
 p_dataFamInstDecl style = \case
   DataFamInstDecl {dfid_eqn = HsIB {hsib_body = FamEqn {..}}} ->
     p_dataDecl style feqn_tycon (map typeArgToType feqn_pats) feqn_fixity feqn_rhs
-  DataFamInstDecl {dfid_eqn = HsIB {hsib_body = XFamEqn {}}} ->
-    notImplemented "XFamEqn"
-  DataFamInstDecl {dfid_eqn = XHsImplicitBndrs {}} ->
-    notImplemented "XHsImplicitBndrs"
 
 match_overlap_mode :: Maybe (Located OverlapMode) -> R () -> R ()
 match_overlap_mode overlap_mode layoutStrategy =

@@ -16,7 +16,6 @@ import Ormolu.Printer.Meat.Common
 p_roleAnnot :: RoleAnnotDecl GhcPs -> R ()
 p_roleAnnot = \case
   RoleAnnotDecl NoExtField l_name anns -> p_roleAnnot' l_name anns
-  XRoleAnnotDecl x -> noExtCon x
 
 p_roleAnnot' :: Located RdrName -> [Located (Maybe Role)] -> R ()
 p_roleAnnot' l_name anns = do

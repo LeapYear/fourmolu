@@ -17,4 +17,3 @@ p_defaultDecl = \case
     breakpoint
     inci . parens N $
       sep commaDel (sitcc . located' p_hsType) ts
-  XDefaultDecl x -> noExtCon x

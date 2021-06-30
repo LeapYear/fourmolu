@@ -69,7 +69,6 @@ p_classDecl ctx name HsQTvs {..} fixity fdeps csigs cdefs cats catdefs cdocs = d
   unless (null allDecls) $ do
     breakpoint -- Ensure whitespace is added after where clause.
     inci (p_hsDeclsRespectGrouping Associated allDecls)
-p_classDecl _ _ (XLHsQTyVars c) _ _ _ _ _ _ _ = noExtCon c
 
 p_classContext :: LHsContext GhcPs -> R ()
 p_classContext ctx = unless (null (unLoc ctx)) $ do

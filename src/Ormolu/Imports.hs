@@ -41,7 +41,6 @@ normalizeImports preserveGroups =
           { ideclHiding = second (fmap normalizeLies) <$> ideclHiding,
             ..
           }
-    g _ = notImplemented "XImportDecl"
 
 -- | Combine two import declarations. It should be assumed that 'ImportId's
 -- are equal.
@@ -59,7 +58,6 @@ combineImports (L lx ImportDecl {..}) (L _ y) =
           _ -> Nothing,
         ..
       }
-combineImports _ _ = notImplemented "XImportDecl"
 
 -- | Import id, a collection of all things that justify having a separate
 -- import entry. This is used for merging of imports. If two imports have
@@ -97,7 +95,6 @@ importId (L _ ImportDecl {..}) =
   where
     isPrelude = moduleNameString moduleName == "Prelude"
     moduleName = unLoc ideclName
-importId _ = notImplemented "XImportDecl"
 
 -- | Normalize a collection of import\/export items.
 normalizeLies :: [LIE GhcPs] -> [LIE GhcPs]
@@ -146,12 +143,10 @@ normalizeLies = sortOn (getIewn . unLoc) . M.elems . foldl' combine M.empty
                         IEGroup NoExtField _ _ -> notImplemented "IEGroup"
                         IEDoc NoExtField _ -> notImplemented "IEDoc"
                         IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
-                        XIE x -> noExtCon x
                     IEModuleContents NoExtField _ -> notImplemented "IEModuleContents"
                     IEGroup NoExtField _ _ -> notImplemented "IEGroup"
                     IEDoc NoExtField _ -> notImplemented "IEDoc"
                     IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
-                    XIE x -> noExtCon x
                in Just (f <$> old)
        in M.alter alter wname m
 
@@ -174,7 +169,6 @@ getIewn = \case
   IEGroup NoExtField _ _ -> notImplemented "IEGroup"
   IEDoc NoExtField _ -> notImplemented "IEDoc"
   IEDocNamed NoExtField _ -> notImplemented "IEDocNamed"
-  XIE x -> noExtCon x
 
 -- | Like 'compareIewn' for located wrapped names.
 compareLIewn :: LIEWrappedName RdrName -> LIEWrappedName RdrName -> Ordering

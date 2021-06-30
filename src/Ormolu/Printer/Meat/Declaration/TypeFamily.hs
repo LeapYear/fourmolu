@@ -53,9 +53,6 @@ p_famDecl style FamilyDecl {fdTyVars = HsQTvs {..}, ..} = do
         Just eqs -> do
           newline
           sep newline (located' (inci . p_tyFamInstEqn)) eqs
-p_famDecl _ FamilyDecl {fdTyVars = XLHsQTyVars {}} =
-  notImplemented "XLHsQTyVars"
-p_famDecl _ (XFamilyDecl x) = noExtCon x
 
 p_familyResultSigL ::
   Located (FamilyResultSig GhcPs) ->
@@ -72,8 +69,6 @@ p_familyResultSigL l =
         equals
         breakpoint
         located bndr p_hsTyVarBndr
-      XFamilyResultSig x ->
-        noExtCon x
 
 p_injectivityAnn :: InjectivityAnn GhcPs -> R ()
 p_injectivityAnn (InjectivityAnn a bs) = do
@@ -104,8 +99,6 @@ p_tyFamInstEqn HsIB {hsib_body = FamEqn {..}} = do
     equals
     breakpoint
     inci (located feqn_rhs p_hsType)
-p_tyFamInstEqn HsIB {hsib_body = XFamEqn x} = noExtCon x
-p_tyFamInstEqn (XHsImplicitBndrs x) = noExtCon x
 
 ----------------------------------------------------------------------------
 -- Helpers

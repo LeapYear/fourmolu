@@ -63,7 +63,6 @@ p_typeAscription HsWC {..} = inci $ do
     then newline
     else breakpoint
   located t p_hsType
-p_typeAscription (XHsWildCardBndrs x) = noExtCon x
 
 p_patSynSig ::
   [Located RdrName] ->
@@ -105,7 +104,6 @@ p_fixSig = \case
     atom n
     space
     sitcc $ sep commaDel p_rdrName names
-  XFixitySig x -> noExtCon x
 
 p_inlineSig ::
   -- | Name
@@ -232,5 +230,3 @@ p_standaloneKindSig (StandaloneKindSig NoExtField name bndrs) = do
     breakpoint
     case bndrs of
       HsIB NoExtField sig -> located sig p_hsType
-      XHsImplicitBndrs x -> noExtCon x
-p_standaloneKindSig (XStandaloneKindSig c) = noExtCon c

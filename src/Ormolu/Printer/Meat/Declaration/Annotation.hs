@@ -17,7 +17,6 @@ p_annDecl = \case
     p_annProv annProv
     breakpoint
     located expr p_hsExpr
-  XAnnDecl x -> noExtCon x
 
 p_annProv :: AnnProvenance (IdP GhcPs) -> R ()
 p_annProv = \case

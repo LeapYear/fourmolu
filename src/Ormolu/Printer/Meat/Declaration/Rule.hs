@@ -20,7 +20,6 @@ p_ruleDecls = \case
   HsRules NoExtField _ xs ->
     pragma "RULES" $
       sep breakpoint (sitcc . located' p_ruleDecl) xs
-  XRuleDecls x -> noExtCon x
 
 p_ruleDecl :: RuleDecl GhcPs -> R ()
 p_ruleDecl = \case
@@ -47,7 +46,6 @@ p_ruleDecl = \case
       inci $ do
         breakpoint
         located rhs p_hsExpr
-  XRuleDecl x -> noExtCon x
 
 p_ruleName :: (SourceText, RuleName) -> R ()
 p_ruleName (_, name) = atom $ (HsString NoSourceText name :: HsLit GhcPs)
@@ -58,4 +56,3 @@ p_ruleBndr = \case
   RuleBndrSig NoExtField x hswc -> parens N . sitcc $ do
     p_rdrName x
     p_typeAscription hswc
-  XRuleBndr x -> noExtCon x

@@ -72,7 +72,6 @@ p_valDecl = \case
   VarBind {} -> notImplemented "VarBinds" -- introduced by the type checker
   AbsBinds {} -> notImplemented "AbsBinds" -- introduced by the type checker
   PatSynBind NoExtField psb -> p_patSynBind psb
-  XHsBindsLR x -> noExtCon x
 
 p_funBind ::
   Located RdrName ->
@@ -116,8 +115,6 @@ p_matchGroup' placer render style MG {..} = do
         (matchStrictness m)
         m_pats
         m_grhss
-    p_Match (XMatch x) = noExtCon x
-p_matchGroup' _ _ _ (XMatchGroup x) = noExtCon x
 
 -- | Function id obtained through pattern matching on 'FunBind' should not
 -- be used to print the actual equations because the different ‘RdrNames’
@@ -267,7 +264,6 @@ p_match' placer render style isInfix strictness m_pats GRHSs {..} = do
     switchLayout [patGrhssSpan] $
       placeHanging placement p_body
     inci p_where
-p_match' _ _ _ _ _ _ (XGRHSs x) = noExtCon x
 
 p_grhs :: GroupStyle -> GRHS GhcPs (LHsExpr GhcPs) -> R ()
 p_grhs = p_grhs' exprPlacement p_hsExpr
@@ -306,7 +302,6 @@ p_grhs' placer render style (GRHS NoExtField guards body) =
         Nothing -> Nothing
         Just gs -> (Just . getLoc . NE.last) gs
     p_body = located body render
-p_grhs' _ _ _ (XGRHS x) = noExtCon x
 
 p_hsCmd :: HsCmd GhcPs -> R ()
 p_hsCmd = \case
@@ -349,12 +344,10 @@ p_hsCmd = \case
     inci . located es $
       sitcc . sep newline (sitcc . withSpacing (p_stmt' cmdPlacement p_hsCmd))
   HsCmdWrap {} -> notImplemented "HsCmdWrap"
-  XCmd x -> noExtCon x
 
 p_hsCmdTop :: HsCmdTop GhcPs -> R ()
 p_hsCmdTop = \case
   HsCmdTop NoExtField cmd -> located cmd p_hsCmd
-  XCmdTop x -> noExtCon x
 
 -- | Render an expression preserving blank lines between such consecutive
 -- expressions found in the original source code.
@@ -457,7 +450,6 @@ p_stmt' placer render = \case
     txt "rec"
     space
     sitcc $ sepSemi (withSpacing (p_stmt' placer render)) recS_stmts
-  XStmtLR c -> noExtCon c
 
 gatherStmt :: ExprLStmt GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmt (L _ (ParStmt NoExtField block _ _)) =
@@ -469,7 +461,6 @@ gatherStmt stmt = [[stmt]]
 gatherStmtBlock :: ParStmtBlock GhcPs GhcPs -> [[ExprLStmt GhcPs]]
 gatherStmtBlock (ParStmtBlock _ stmts _ _) =
   foldr (liftAppend . gatherStmt) [] stmts
-gatherStmtBlock (XParStmtBlock x) = noExtCon x
 
 p_hsLocalBinds :: HsLocalBindsLR GhcPs GhcPs -> R ()
 p_hsLocalBinds = \case
@@ -504,11 +495,9 @@ p_hsLocalBinds = \case
         p_ipBind (IPBind NoExtField (Right _) _) =
           -- Should only occur after the type checker
           notImplemented "IPBind _ (Right _) _"
-        p_ipBind (XIPBind x) = noExtCon x
      in sepSemi (located' p_ipBind) xs
   HsIPBinds NoExtField _ -> notImplemented "HsIpBinds"
   EmptyLocalBinds NoExtField -> return ()
-  XHsLocalBindsLR x -> noExtCon x
 
 p_hsRecField ::
   HsRecField' RdrName (LHsExpr GhcPs) ->
@@ -536,7 +525,6 @@ p_hsExpr' s = \case
     case x of
       Unambiguous NoExtField name -> p_rdrName name
       Ambiguous NoExtField name -> p_rdrName name
-      XAmbiguousFieldOcc xx -> noExtCon xx
   HsOverLabel NoExtField _ v -> do
     txt "#"
     atom v
@@ -649,7 +637,6 @@ p_hsExpr' s = \case
         p_arg = \case
           Present NoExtField x -> located x p_hsExprListItem
           Missing NoExtField -> pure ()
-          XTupArg x -> noExtCon x
         p_larg = sitcc . located' p_arg
         parens' =
           case boxity of
@@ -726,7 +713,6 @@ p_hsExpr' s = \case
           (f :: HsRecField GhcPs (LHsExpr GhcPs))
             { hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
                 FieldOcc _ n -> n
-                XFieldOcc x -> noExtCon x
             }
         fields = located' (p_hsRecField . updName) <$> rec_flds
         dotdot =
@@ -750,7 +736,6 @@ p_hsExpr' s = \case
             { hsRecFieldLbl = case unLoc $ hsRecFieldLbl f of
                 Ambiguous _ n -> n
                 Unambiguous _ n -> n
-                XAmbiguousFieldOcc x -> noExtCon x
             }
     inci . braces N $
       sep
@@ -763,8 +748,6 @@ p_hsExpr' s = \case
     txt "::"
     breakpoint
     inci $ located hsib_body p_hsType
-  ExprWithTySig NoExtField _ HsWC {hswc_body = XHsImplicitBndrs x} -> noExtCon x
-  ExprWithTySig NoExtField _ (XHsWildCardBndrs x) -> noExtCon x
   ArithSeq NoExtField _ x ->
     case x of
       From from -> brackets s $ do
@@ -820,7 +803,6 @@ p_hsExpr' s = \case
   HsBinTick {} -> notImplemented "HsBinTick"
   HsTickPragma {} -> notImplemented "HsTickPragma"
   HsWrap {} -> notImplemented "HsWrap"
-  XExpr x -> noExtCon x
 
 p_patSynBind :: PatSynBind GhcPs GhcPs -> R ()
 p_patSynBind PSB {..} = do
@@ -872,7 +854,6 @@ p_patSynBind PSB {..} = do
           space
           p_rdrName r
       inci rhs
-p_patSynBind (XPatSynBind x) = noExtCon x
 
 p_case ::
   Data body =>
@@ -1011,7 +992,6 @@ p_pat = \case
     located pat p_pat
     p_typeAscription hswc
   CoPat {} -> notImplemented "CoPat" -- apparently created at some later stage
-  XPat x -> noExtCon x
 
 p_pat_hsRecField :: HsRecField' (FieldOcc GhcPs) (LPat GhcPs) -> R ()
 p_pat_hsRecField HsRecField {..} = do
@@ -1052,7 +1032,6 @@ p_hsSplice = \case
     txt "|]"
   HsSpliced {} -> notImplemented "HsSpliced"
   HsSplicedT {} -> notImplemented "HsSplicedT"
-  XSplice x -> noExtCon x
 
 p_hsSpliceTH ::
   -- | Typed splice?
@@ -1107,7 +1086,6 @@ p_hsBracket = \case
     located expr p_hsExpr
     breakpoint'
     txt "||]"
-  XBracket x -> noExtCon x
   where
     quote :: Text -> R () -> R ()
     quote name body = do
@@ -1188,7 +1166,6 @@ liftAppend (x : xs) (y : ys) = x <> y : liftAppend xs ys
 getGRHSSpan :: GRHS GhcPs (Located body) -> SrcSpan
 getGRHSSpan (GRHS NoExtField guards body) =
   combineSrcSpans' $ getLoc body :| map getLoc guards
-getGRHSSpan (XGRHS x) = noExtCon x
 
 -- | Place a thing that may have a hanging form. This function handles how
 -- to separate it from preceding expressions and whether to bump indentation
@@ -1223,7 +1200,6 @@ cmdPlacement = \case
 cmdTopPlacement :: HsCmdTop GhcPs -> Placement
 cmdTopPlacement = \case
   HsCmdTop NoExtField (L _ x) -> cmdPlacement x
-  XCmdTop x -> noExtCon x
 
 -- | Check if given expression has a hanging form.
 exprPlacement :: HsExpr GhcPs -> Placement

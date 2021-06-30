@@ -122,7 +122,6 @@ p_hsDecl style = \case
       DocGroup n str -> p_hsDocString (Asterisk n) False (noLoc str)
   RoleAnnotD NoExtField x -> p_roleAnnot x
   KindSigD NoExtField s -> p_standaloneKindSig s
-  XHsDecl x -> noExtCon x
 
 p_tyClDecl :: FamilyStyle -> TyClDecl GhcPs -> R ()
 p_tyClDecl style = \case
@@ -147,19 +146,16 @@ p_tyClDecl style = \case
       tcdATs
       tcdATDefs
       tcdDocs
-  XTyClDecl x -> noExtCon x
 
 p_instDecl :: FamilyStyle -> InstDecl GhcPs -> R ()
 p_instDecl style = \case
   ClsInstD NoExtField x -> p_clsInstDecl x
   TyFamInstD NoExtField x -> p_tyFamInstDecl style x
   DataFamInstD NoExtField x -> p_dataFamInstDecl style x
-  XInstDecl x -> noExtCon x
 
 p_derivDecl :: DerivDecl GhcPs -> R ()
 p_derivDecl = \case
   d@DerivDecl {} -> p_standaloneDerivDecl d
-  XDerivDecl x -> noExtCon x
 
 -- | Determine if these declarations should be grouped together.
 groupedDecls ::
@@ -302,7 +298,6 @@ warnSigRdrNames :: HsDecl GhcPs -> Maybe [RdrName]
 warnSigRdrNames (WarningD NoExtField (Warnings NoExtField _ ws)) = Just $
   flip concatMap ws $ \case
     L _ (Warning NoExtField ns _) -> map unLoc ns
-    L _ (XWarnDecl x) -> noExtCon x
 warnSigRdrNames _ = Nothing
 
 patBindNames :: Pat GhcPs -> [RdrName]
@@ -324,4 +319,3 @@ patBindNames (NPlusKPat NoExtField (L _ n) _ _ _ _) = [n]
 patBindNames (ConPatIn _ d) = concatMap (patBindNames . unLoc) (hsConPatArgs d)
 patBindNames ConPatOut {} = notImplemented "ConPatOut" -- created by renamer
 patBindNames (CoPat NoExtField _ p _) = patBindNames p
-patBindNames (XPat x) = noExtCon x
