@@ -11,10 +11,9 @@ module Ormolu.Printer.Meat.Declaration.Signature
   )
 where
 
-import BasicTypes
-import BooleanFormula
 import Control.Monad
 import GHC
+import GHC.Data.BooleanFormula
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type
@@ -162,6 +161,8 @@ p_activation = \case
     txt "["
     atom n
     txt "]"
+  -- TODO: implement
+  FinalActive -> notImplemented "FinalActive"
 
 p_specInstSig :: LHsSigType GhcPs -> R ()
 p_specInstSig hsib =

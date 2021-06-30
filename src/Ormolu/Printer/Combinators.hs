@@ -70,10 +70,10 @@ where
 import Control.Monad
 import Data.List (intersperse)
 import Data.Text (Text)
+import GHC.Types.SrcLoc
 import Ormolu.Config
 import Ormolu.Printer.Comments
 import Ormolu.Printer.Internal
-import SrcLoc
 
 ----------------------------------------------------------------------------
 -- Basic
@@ -99,10 +99,10 @@ located ::
   (a -> R ()) ->
   R ()
 located (L (UnhelpfulSpan _) a) f = f a
-located (L (RealSrcSpan l) a) f = do
+located (L s@(RealSrcSpan l _) a) f = do
   spitPrecedingComments l
   withEnclosingSpan l $
-    switchLayout [RealSrcSpan l] (f a)
+    switchLayout [s] (f a)
   spitFollowingComments l
 
 -- | A version of 'located' with arguments flipped.

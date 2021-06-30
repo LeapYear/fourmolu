@@ -12,6 +12,7 @@ where
 import Control.Monad
 import Data.Maybe (isNothing)
 import GHC
+import Language.Haskell.TH.Ppr (ForallVisFlag (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import Ormolu.Printer.Meat.Type

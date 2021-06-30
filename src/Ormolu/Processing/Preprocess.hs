@@ -12,12 +12,12 @@ import Control.Monad
 import Data.Char (isSpace)
 import qualified Data.List as L
 import Data.Maybe (isJust, maybeToList)
-import FastString
+import GHC.Data.FastString
+import GHC.Types.SrcLoc
 import Ormolu.Config (RegionDeltas (..))
 import Ormolu.Parser.Shebang (isShebang)
 import Ormolu.Processing.Common
 import qualified Ormolu.Processing.Cpp as Cpp
-import SrcLoc
 
 -- | Transform given input possibly returning comments extracted from it.
 -- This handles LINE pragmas, CPP, shebangs, and the magic comments for

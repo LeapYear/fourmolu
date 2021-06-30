@@ -43,7 +43,7 @@ import Data.Functor.Identity (Identity (..))
 import Data.YAML (Pos)
 import Data.YAML.Aeson (decode1)
 import GHC.Generics (Generic)
-import qualified SrcLoc as GHC
+import qualified GHC.Types.SrcLoc as GHC
 import System.Directory
   ( XdgDirectory (XdgConfig),
     findFile,

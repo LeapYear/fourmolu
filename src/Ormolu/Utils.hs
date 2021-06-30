@@ -30,7 +30,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import GHC
 import GHC.DynFlags (baseDynFlags)
-import qualified Outputable as GHC
+import qualified GHC.Utils.Outputable as GHC
 
 -- | Relative positions in a list.
 data RelativePos
@@ -96,13 +96,13 @@ typeArgToType = \case
 -- | Get 'RealSrcSpan' out of 'SrcSpan' if the span is “helpful”.
 unSrcSpan :: SrcSpan -> Maybe RealSrcSpan
 unSrcSpan = \case
-  RealSrcSpan r -> Just r
+  RealSrcSpan r _ -> Just r
   UnhelpfulSpan _ -> Nothing
 
 -- | Increment line number in a 'SrcSpan'.
 incSpanLine :: Int -> SrcSpan -> SrcSpan
 incSpanLine i = \case
-  RealSrcSpan s ->
+  RealSrcSpan s bs ->
     let start = realSrcSpanStart s
         end = realSrcSpanEnd s
         incLine x =
@@ -110,7 +110,7 @@ incSpanLine i = \case
               line = srcLocLine x
               col = srcLocCol x
            in mkRealSrcLoc file (line + i) col
-     in RealSrcSpan (mkRealSrcSpan (incLine start) (incLine end))
+     in RealSrcSpan (mkRealSrcSpan (incLine start) (incLine end)) bs
   UnhelpfulSpan x -> UnhelpfulSpan x
 
 -- | Do two declarations have a blank between them?

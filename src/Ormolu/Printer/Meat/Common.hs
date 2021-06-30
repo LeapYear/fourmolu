@@ -18,8 +18,8 @@ import Control.Monad
 import Data.List (intersperse, isPrefixOf)
 import qualified Data.Text as T
 import GHC hiding (GhcPs, IE)
-import Name (nameStableString)
-import OccName (OccName (..))
+import GHC.Types.Name (nameStableString)
+import GHC.Types.Name.Occurrence (OccName (..))
 import Ormolu.Config
 import Ormolu.Printer.Combinators
 import Ormolu.Utils
@@ -198,4 +198,4 @@ p_hsDocString hstyle needsNewline (L l str) = do
       -- attached to it and instead its location can be obtained from
       -- nearest enclosing span.
       UnhelpfulSpan _ -> getEnclosingSpan (const True)
-      RealSrcSpan spn -> pure $ Just spn
+      RealSrcSpan spn _ -> pure $ Just spn

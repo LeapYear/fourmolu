@@ -12,6 +12,7 @@ import Control.Monad
 import Data.Maybe (isJust, maybeToList)
 import qualified Data.Text as Text
 import GHC
+import Language.Haskell.TH.Ppr (ForallVisFlag (..))
 import Ormolu.Config
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
@@ -96,7 +97,7 @@ p_conDecl singleConstRec = \case
     let conDeclSpn =
           fmap getLoc con_names
             <> [getLoc con_forall]
-            <> conTyVarsSpans con_qvars
+            <> map getLoc con_qvars
             <> maybeToList (fmap getLoc con_mb_cxt)
             <> conArgsSpans con_args
     switchLayout conDeclSpn $ do
@@ -116,12 +117,13 @@ p_conDecl singleConstRec = \case
                 else breakpoint
         interArgBreak
         when (unLoc con_forall) $ do
-          p_forallBndrs ForallInvis p_hsTyVarBndr (hsq_explicit con_qvars)
+          p_forallBndrs ForallInvis p_hsTyVarBndr con_qvars
           interArgBreak
         forM_ con_mb_cxt p_lhsContext
         case con_args of
           PrefixCon xs -> do
-            sep breakpoint (located' p_hsType) xs
+            -- TODO: render HsArrow from xs
+            sep breakpoint (located' p_hsType) $ map hsScaledThing xs
             unless (null xs) $ do
               space
               txt "->"
@@ -154,31 +156,28 @@ p_conDecl singleConstRec = \case
         PrefixCon xs -> do
           p_rdrName con_name
           unless (null xs) breakpoint
-          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) xs
+          -- TODO: render HsArrow from xs
+          inci . sitcc $ sep breakpoint (sitcc . located' p_hsTypePostDoc) $ map hsScaledThing xs
         RecCon l -> do
           p_rdrName con_name
           breakpoint
           inciIf (not singleConstRec) (located l p_conDeclFields)
         InfixCon x y -> do
-          located x p_hsType
+          located (hsScaledThing x) p_hsType
           breakpoint
           inci $ do
             p_rdrName con_name
             space
-            located y p_hsType
+            located (hsScaledThing y) p_hsType
 
 conArgsSpans :: HsConDeclDetails GhcPs -> [SrcSpan]
 conArgsSpans = \case
   PrefixCon xs ->
-    getLoc <$> xs
+    getLoc . hsScaledThing <$> xs
   RecCon l ->
     [getLoc l]
   InfixCon x y ->
-    [getLoc x, getLoc y]
-
-conTyVarsSpans :: LHsQTyVars GhcPs -> [SrcSpan]
-conTyVarsSpans = \case
-  HsQTvs {..} -> getLoc <$> hsq_explicit
+    [getLoc $ hsScaledThing x, getLoc $ hsScaledThing y]
 
 p_lhsContext ::
   LHsContext GhcPs ->

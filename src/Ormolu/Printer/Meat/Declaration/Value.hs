@@ -14,10 +14,7 @@ module Ormolu.Printer.Meat.Declaration.Value
   )
 where
 
-import Bag (bagToList)
-import BasicTypes
 import Control.Monad
-import Ctype (is_space)
 import Data.Bool (bool)
 import Data.Char (isPunctuation, isSymbol)
 import Data.Data hiding (Infix, Prefix)
@@ -28,7 +25,9 @@ import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC
-import OccName (occNameString)
+import GHC.Data.Bag (bagToList)
+import GHC.Parser.CharClass (is_space)
+import GHC.Types.Name.Occurrence (occNameString)
 import Ormolu.Config
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Internal
@@ -343,7 +342,6 @@ p_hsCmd = \case
     newline
     inci . located es $
       sitcc . sep newline (sitcc . withSpacing (p_stmt' cmdPlacement p_hsCmd))
-  HsCmdWrap {} -> notImplemented "HsCmdWrap"
 
 p_hsCmdTop :: HsCmdTop GhcPs -> R ()
 p_hsCmdTop = \case

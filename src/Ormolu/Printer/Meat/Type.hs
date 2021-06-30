@@ -17,6 +17,7 @@ where
 
 import Data.Data (Data)
 import GHC hiding (isPromoted)
+import Language.Haskell.TH.Ppr (ForallVisFlag (..))
 import Ormolu.Printer.Combinators
 import Ormolu.Printer.Meat.Common
 import {-# SOURCE #-} Ormolu.Printer.Meat.Declaration.Value (p_hsSplice, p_stringLit)
@@ -36,8 +37,10 @@ data TypeDocStyle
 
 p_hsType' :: Bool -> TypeDocStyle -> HsType GhcPs -> R ()
 p_hsType' multilineArgs docStyle = \case
-  HsForAllTy NoExtField visibility bndrs t -> do
-    p_forallBndrs visibility p_hsTyVarBndr bndrs
+  HsForAllTy NoExtField tele t -> do
+    case tele of
+      HsForAllVis _ tyvars -> p_forallBndrs ForallVis p_hsTyVarBndr tyvars
+      HsForAllInvis _ tyvars -> p_forallBndrs ForallInvis p_hsTyVarBndr tyvars
     interArgBreak
     p_hsTypeR (unLoc t)
   HsQualTy NoExtField qs t -> do
@@ -82,7 +85,8 @@ p_hsType' multilineArgs docStyle = \case
     inci $ do
       txt "@"
       located kd p_hsType
-  HsFunTy NoExtField x y@(L _ y') -> do
+  -- TODO: use HsArrow to change rendering of arrow
+  HsFunTy NoExtField _ x y@(L _ y') -> do
     located x p_hsType
     space
     txt "->"
@@ -185,7 +189,7 @@ p_hsType' multilineArgs docStyle = \case
 hasDocStrings :: HsType GhcPs -> Bool
 hasDocStrings = \case
   HsDocTy {} -> True
-  HsFunTy _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
+  HsFunTy _ _ (L _ x) (L _ y) -> hasDocStrings x || hasDocStrings y
   _ -> False
 
 p_hsContext :: HsContext GhcPs -> R ()
@@ -194,11 +198,11 @@ p_hsContext = \case
   [x] -> located x p_hsType
   xs -> parens N $ sep commaDel (sitcc . located' p_hsType) xs
 
-p_hsTyVarBndr :: HsTyVarBndr GhcPs -> R ()
+p_hsTyVarBndr :: HsTyVarBndr flag GhcPs -> R ()
 p_hsTyVarBndr = \case
-  UserTyVar NoExtField x ->
+  UserTyVar NoExtField _ x ->
     p_rdrName x
-  KindedTyVar NoExtField l k -> parens N . sitcc $ do
+  KindedTyVar NoExtField _ l k -> parens N . sitcc $ do
     located l atom
     space
     txt "::"
@@ -207,6 +211,8 @@ p_hsTyVarBndr = \case
 
 -- | Render several @forall@-ed variables.
 p_forallBndrs :: Data a => ForallVisFlag -> (a -> R ()) -> [Located a] -> R ()
+-- TODO: take in HsForAllTelescope instead? given that ForallVisFlag is removed from ghc-lib-parser
+-- and we're using template-haskell's type for now.
 p_forallBndrs ForallInvis _ [] = txt "forall."
 p_forallBndrs ForallVis _ [] = txt "forall ->"
 p_forallBndrs vis p tyvars =
@@ -259,10 +265,10 @@ tyVarsToTypes :: LHsQTyVars GhcPs -> [LHsType GhcPs]
 tyVarsToTypes = \case
   HsQTvs {..} -> fmap tyVarToType <$> hsq_explicit
 
-tyVarToType :: HsTyVarBndr GhcPs -> HsType GhcPs
+tyVarToType :: HsTyVarBndr flag GhcPs -> HsType GhcPs
 tyVarToType = \case
-  UserTyVar NoExtField tvar -> HsTyVar NoExtField NotPromoted tvar
-  KindedTyVar NoExtField tvar kind ->
+  UserTyVar NoExtField _ tvar -> HsTyVar NoExtField NotPromoted tvar
+  KindedTyVar NoExtField _ tvar kind ->
     -- Note: we always add parentheses because for whatever reason GHC does
     -- not use HsParTy for left-hand sides of declarations. Please see
     -- <https://gitlab.haskell.org/ghc/ghc/issues/17404>. This is fine as
